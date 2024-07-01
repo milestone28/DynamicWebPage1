@@ -16,6 +16,10 @@ export const usersReducer = (state, action) => {
         return {
             users: state.users.filter((w) => w._id !== action.payload._id)
         }
+        case "UPDATE_USER":
+          return {
+            users: [action.payload, ...state.users],
+          }
     default:
       return state;
   }

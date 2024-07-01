@@ -5,14 +5,14 @@ import useUsersContext from "../hooks/useUsersContext";
 
 const Home = () => {
   const {dispatch} = useUsersContext();
-
+  const api_con = "https://dynamicwebpage1.onrender.com/api";
+  //const api_con = "http://localhost:4000/api/";
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/api/users");
+        const response = await axios.get(api_con + "/users");
         const json = response.data;
         dispatch({type: 'LIST_USERS', payload: json})
-        //console.log(users)
       } catch (error) {
         console.error("Error fetching data:", error);
       }
