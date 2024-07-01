@@ -33,5 +33,3 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-
-  exports.api = onRequest(app);
