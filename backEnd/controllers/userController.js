@@ -142,7 +142,7 @@ const updateUser = async (req, res) => {
       return res.status(400).json({ error: "No such user" });
     }
 
-    return res.status(200).json({firstName, lastName, address, email, mobileNumber});
+    return res.status(200).json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

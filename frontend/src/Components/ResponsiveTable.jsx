@@ -18,21 +18,7 @@ const ResponsiveTable = ({ rowsPerPage }) => {
   const [showModal, setShowModal] = useState(false);
   const [currentModal, setCurrentModal] = useState("Delete");
   const [user, setUser] = useState([]);
-  const [formState, setFormState] = useState({
-    id: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    address: '',
-    mobileNumber: ''
-});
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormState(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-};
+
   const renderModal = () => {
     switch (currentModal) {
       case "Delete":
@@ -63,8 +49,8 @@ const ResponsiveTable = ({ rowsPerPage }) => {
               </div>
             </div>
             {_setError && (
-                <p className="text-red-600 text-sm my-4 text-center">{_error}</p>
-              )}
+              <p className="text-red-600 text-sm my-4 text-center">{_error}</p>
+            )}
             <div class="flex justify-center gap-4">
               <button
                 class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-10 rounded mr-2"
@@ -77,12 +63,12 @@ const ResponsiveTable = ({ rowsPerPage }) => {
                 Cancel
               </button>
               <button
-              disabled={isLoading}
-               onClick={()=>onDelete(user._id)}
-              class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-10 rounded">
+                disabled={isLoading}
+                onClick={() => onDelete(user._id)}
+                class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-10 rounded"
+              >
                 Delete
               </button>
-             
             </div>
           </div>
         );
@@ -112,7 +98,12 @@ const ResponsiveTable = ({ rowsPerPage }) => {
                   >
                     First name
                   </label>
-                  <input className="hidden" type="text" defaultValue={user._id} {...register("id")} />
+                  <input
+                    className="hidden"
+                    type="text"
+                    defaultValue={user._id}
+                    {...register("id")}
+                  />
                   <div className="mt-2">
                     <input
                       type="text"
@@ -436,7 +427,7 @@ const ResponsiveTable = ({ rowsPerPage }) => {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: user
+    defaultValues: user,
   });
 
   const { spinner, isLoading } = useSpinner();
@@ -460,9 +451,10 @@ const ResponsiveTable = ({ rowsPerPage }) => {
   };
 
   const onDelete = async (id) => {
+    console.log(id)
     _setError(null);
     try {
-      const response = await axios.delete(api_con + "/user/"+id);
+      const response = await axios.delete(api_con + "/user/" + id);
       const json = response.data;
       dispatch({ type: "DELETE_USER", payload: json });
       spinner();
@@ -471,31 +463,38 @@ const ResponsiveTable = ({ rowsPerPage }) => {
       spinner();
       console.error("Error posting data:", error);
       _setError(error.response.data.error);
-      console.log()
-      if(!_error)
-        _setError(error.response.status + " Something went wrong!");
+      console.log();
+      if (!_error) _setError(error.response.status + " Something went wrong!");
     }
   };
 
   const onUpdate = async (data) => {
-    
+    const id = data.id;
     _setError(null);
     try {
-      const response = await axios.patch(api_con + "/user/"+data.id,data);
+      const response = await axios.patch(api_con + "/user/" + id, data);
       const json = response.data;
-      dispatch({ type: "UPDATE_USER", payload: json });
       spinner();
+      fetchData();
       setShowModal(false);
     } catch (error) {
       spinner();
       console.error("Error posting data:", error);
       _setError(error.response.data.error);
-      console.log()
-      if(!_error)
-        _setError(error.response.status + " Something went wrong!");
+    
     }
   };
 
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(api_con + "/users");
+      const json = response.data;
+      dispatch({type: 'LIST_USERS', payload: json})
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   return (
     <div className="p-5 mt-9">
       <div className="flex justify-between items-center justify-center">
@@ -608,7 +607,30 @@ const ResponsiveTable = ({ rowsPerPage }) => {
 
       <div className="grid md:grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
         {currentRows.map((item, index) => (
-          <div className="bg-white rounded-lg shadow p-4">
+          <div className="bg-white rounded-lg shadow p-4 relative">
+            <div className="absolute top-0 right-0 grid gap-2 grid-cols-2 m-2">
+              {" "}
+              <ion-icon
+                name="create-outline"
+                class="text-xl item-center font-semibold cursor-pointer text-gray-900 bg-bookmark-bg hover:bg-bookmark-bg2 p-1 rounded"
+                onClick={() => {
+                  setUser(item);
+                  setCurrentModal("Update");
+                  setShowModal(true);
+                  _setError("");
+                }}
+              ></ion-icon>
+              <ion-icon
+                name="trash-outline"
+                class="text-xl item-center font-semibold cursor-pointer text-gray-900 bg-bookmark-bg hover:bg-bookmark-bg2 p-1 rounded"
+                onClick={() => {
+                  setUser(item);
+                  setShowModal(true);
+                  setCurrentModal("Delete");
+                  _setError("");
+                }}
+              ></ion-icon>
+            </div>
             <div className="items-center text-sm">
               <div>
                 <span className="font-semibold">Date Created : </span>
@@ -688,8 +710,6 @@ const ResponsiveTable = ({ rowsPerPage }) => {
           {renderModal()}
         </Modal>
       )}
-
-    
     </div>
   );
 };
